@@ -1,82 +1,73 @@
-import pygame, sys, random
+# Impordime vajalikud teegid
+import pygame
+import random
 
+# Käivitame pygame'i
 pygame.init()
 
-# ekraan
-screenX = 640
-screenY = 480
-screen = pygame.display.set_mode((screenX, screenY))
-pygame.display.set_caption("ringid")
+# Määrame akna laiuse ja kõrguse
+laius, korgus = 640, 480
 
-clock = pygame.time.Clock()
+# Loome mänguakna
+ekraan = pygame.display.set_mode((laius, korgus))
 
-# värvid
-background = (25, 30, 45)
-white = (255, 255, 255)
+# Määrame akna pealkirja
+pygame.display.set_caption("Hiir")
 
-# font
-font = pygame.font.SysFont(None, 36)
+# Taustavärv (helesinine)
+TAUST = (150, 200, 245)
 
-# ringide loend
-circles = []
+# Loend ringide salvestamiseks
+ringid = []
 
+# Muutuja programmi tööshoidmiseks
 running = True
 
+# Peatsükkel töötab seni, kuni aken suletakse
 while running:
-    clock.tick(60)
 
+    # Kontrollime kõiki sündmusi
     for event in pygame.event.get():
+
+        # Kui vajutatakse akna sulgemisnuppu
         if event.type == pygame.QUIT:
             running = False
 
+        # Kui tehakse hiireklõps
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouseX, mouseY = pygame.mouse.get_pos()
 
-            # olemasolevad ringid muutuvad suuremaks
-            for circle in circles:
-                circle[3] += 2
+            # Salvestame klõpsu koordinaadid
+            x, y = event.pos
 
-            color = (
-                random.randint(80, 255),
-                random.randint(80, 255),
-                random.randint(80, 255)
-            )
+            # Lisame uue ringi loendisse
+            ringid.append({
+                "x": x,  # x-koordinaat
+                "y": y,  # y-koordinaat
 
-            radius = random.randint(8, 30)
+                # Juhuslik värv (boonus)
+                "varv": (
+                    random.randint(0, 255),
+                    random.randint(0, 255),
+                    random.randint(0, 255)
+                )
+            })
 
-            # x, y, värv, raadius
-            circles.append([mouseX, mouseY, color, radius])
+    # Täidame tausta helesinise värviga
+    ekraan.fill(TAUST)
 
-            # korraga maksimaalselt 10 ringi
-            if len(circles) > 10:
-                circles.pop(0)
+    # Joonistame kõik ringid ekraanile
+    for ring in ringid:
 
-    screen.fill(background)
+        pygame.draw.circle(
+            ekraan,                     # kuhu joonistada
+            ring["varv"],               # ringi värv
+            (ring["x"], ring["y"]),     # ringi asukoht
+            10,                         # raadius 10 pikslit
+            2                           # ainult ääris, paksus 2
+        )
 
-    # ringide joonistamine
-    for circle in circles:
-        x = circle[0]
-        y = circle[1]
-        color = circle[2]
-        radius = circle[3]
-
-        # suurem läbipaistev vari/halo
-        pygame.draw.circle(screen, color, (x, y), radius + 5)
-
-        # põhiring
-        pygame.draw.circle(screen, color, (x, y), radius)
-
-        # valge ääris
-        pygame.draw.circle(screen, white, (x, y), radius, 2)
-
-        # väike hele täpp ringi sees
-        pygame.draw.circle(screen, white, (x - radius // 3, y - radius // 3), max(2, radius // 5))
-
-    # mitu ringi on ekraanil
-    text = font.render("Ringe: " + str(len(circles)) + " / 10", True, white)
-    screen.blit(text, (20, 20))
-
+    # Uuendame ekraani
     pygame.display.flip()
 
+# Sulgeme pygame'i korrektselt
 pygame.quit()
-sys.exit()
